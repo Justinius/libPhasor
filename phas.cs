@@ -233,7 +233,7 @@ namespace libPhasor
 
         public string error_str()
         {
-            string error_string = "";
+            string error_string = "No Error.";
             switch (error_num)
             {
                 case 1:
