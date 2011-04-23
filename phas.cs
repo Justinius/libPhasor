@@ -205,6 +205,23 @@ namespace libPhasor
                 return false;
         }
 
+        public override bool Equals(object o)
+        {
+            try
+            {
+                return (bool)(this == (phasor)o);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)Math.Floor(mX_cord * mY_cord);
+        }
+
         #endregion
 
         public void phas2rect(ref double x_out, ref double y_out)
