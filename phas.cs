@@ -189,6 +189,23 @@ namespace libPhasor
             return new phasor(p1.mag / c, p1.angle_deg, false);
         }
 
+        public static phasor operator /(double c, phasor p1)
+        {
+            //dividing by a scalar by a phasor
+            //we treat as a complex number, multiply top and bottom by complex conjugate
+            //get p1.x and its y and complex conjugate
+            double x_val = p1.x;
+            double y_val = p1.y;
+            double y_conj_val = -1 * y_val;
+            
+            //denominator becomes x^2 + y^2
+            //and we have the original scalar c
+            double mult_term = c / (x_val * x_val + y_val * y_val);
+            //numerator is just the complex conjugate
+
+            return ((new phasor(x_val, y_conj_val, true))*mult_term);
+        }
+
         public static bool operator ==(phasor p1, phasor p2)
         {
             if (p1.x == p2.x && p1.y == p2.y)
@@ -260,30 +277,34 @@ namespace libPhasor
 
         public phasor(double x_cord, double y_cord, bool rect)
         {
+
+            #region check for NaN and Infinity
+            if (Double.IsNaN(x_cord) || Double.IsNaN(y_cord))
+            {
+                this.mX_cord = 0;
+                this.mY_cord = 0;
+                this.mRadius = 0;
+                this.mAngle = 0;
+                this.error_num = 1;
+                this.isError = true;
+            }
+
+            if (Double.IsInfinity(x_cord) || Double.IsInfinity(y_cord))
+            {
+                this.mX_cord = 0;
+                this.mY_cord = 0;
+                this.mRadius = 0;
+                this.mAngle = 0;
+                this.error_num = 2;
+                this.isError = true;
+            }
+
+            if (isError)
+                return;
+            #endregion
+            
             if (rect) //rectangular coordinates
             {
-                #region check for NaN and Infinity
-                if (Double.IsNaN(x_cord) || Double.IsNaN(y_cord))
-                {
-                    this.mX_cord = 0;
-                    this.mY_cord = 0;
-                    this.mRadius = 0;
-                    this.mAngle = 0;
-                    this.error_num = 1;
-                    this.isError = true;
-                }
-
-                if (Double.IsInfinity(x_cord) || Double.IsInfinity(y_cord))
-                {
-                    this.mX_cord = 0;
-                    this.mY_cord = 0;
-                    this.mRadius = 0;
-                    this.mAngle = 0;
-                    this.error_num = 2;
-                    this.isError = true;
-                }
-                #endregion
-
                 this.mX_cord = x_cord;
                 this.mY_cord = y_cord;
 
@@ -296,8 +317,8 @@ namespace libPhasor
                 this.mRadius = x_cord;
                 this.mAngle = y_cord;
                 double ang = deg2rad(mAngle);
-                this.mX_cord = x_cord * Math.Cos(y_cord);
-                this.mY_cord = x_cord * Math.Sin(y_cord);
+                this.mX_cord = x_cord * Math.Cos(ang);
+                this.mY_cord = x_cord * Math.Sin(ang);
             }
         }
 
