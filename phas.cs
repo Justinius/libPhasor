@@ -12,6 +12,7 @@ namespace libPhasor
         private double mRadius;
         private double mAngle;
         private int error_num;
+        private int number_dec_places;
         public bool isError;
 
         #region utility functions
@@ -151,42 +152,55 @@ namespace libPhasor
                 update_on_cord(); //update phasor based on changed y position
             }
         }
+        
+        public int num_places
+        {
+            get { return number_dec_places; }
+            set
+            {
+                number_dec_places = value;
+                if (number_dec_places > 10)
+                    number_dec_places = 10;
+                else if (number_dec_places < 0)
+                    number_dec_places = 0;
+            }
+        }
         #endregion
 
         #region operator overloading
         public static phasor operator +(phasor p1, phasor p2)
         {
-            return new phasor(p1.x + p2.x, p1.y + p2.y, true);
+            return new phasor(p1.x + p2.x, p1.y + p2.y, Math.Min(p1.num_places, p2.num_places), true);
         }
 
         public static phasor operator -(phasor p1, phasor p2)
         {
-            return new phasor(p1.x - p2.x, p1.y - p2.y, true);
+            return new phasor(p1.x - p2.x, p1.y - p2.y, Math.Min(p1.num_places, p2.num_places), true);
         }
 
         public static phasor operator *(phasor p1, phasor p2)
         {
-            return new phasor(p1.mag * p2.mag, p1.angle_deg + p2.angle_deg, false);
+            return new phasor(p1.mag * p2.mag, p1.angle_deg + p2.angle_deg, Math.Min(p1.num_places, p2.num_places), false);
         }
 
         public static phasor operator *(double c, phasor p2)
         {
-            return new phasor(c*p2.mag, p2.angle_deg, false);
+            return new phasor(c*p2.mag, p2.angle_deg, p2.num_places, false);
         }
 
         public static phasor operator *(phasor p1, double c)
         {
-            return new phasor(c * p1.mag, p1.angle_deg, false);
+            return new phasor(c * p1.mag, p1.angle_deg, p1.num_places, false);
         }
 
         public static phasor operator /(phasor p1, phasor p2)
         {
-            return new phasor(p1.mag/p2.mag, p1.angle_deg - p2.angle_deg, false);
+            return new phasor(p1.mag/p2.mag, p1.angle_deg - p2.angle_deg, Math.Min(p1.num_places, p2.num_places), false);
         }
              
         public static phasor operator /(phasor p1, double c)
         {
-            return new phasor(p1.mag / c, p1.angle_deg, false);
+            return new phasor(p1.mag / c, p1.angle_deg, p1.num_places, false);
         }
 
         public static phasor operator /(double c, phasor p1)
@@ -203,7 +217,7 @@ namespace libPhasor
             double mult_term = c / (x_val * x_val + y_val * y_val);
             //numerator is just the complex conjugate
 
-            return ((new phasor(x_val, y_conj_val, true))*mult_term);
+            return ((new phasor(x_val, y_conj_val, p1.num_places, true))*mult_term);
         }
 
         public static bool operator ==(phasor p1, phasor p2)
@@ -270,9 +284,29 @@ namespace libPhasor
             return error_string;
         }
 
+        public phasor set_resistor(double resistor_val)
+        {
+            return new phasor(resistor_val, 0, false);
+        }
+
+        public phasor set_capacitor(double val_in_farads, double freq_in_rads)
+        {
+            return new phasor(1/(val_in_farads * freq_in_rads), -90, false);
+        }
+
+        public phasor set_inductor(double val_in_henries, double freq_in_rads)
+        {
+            return new phasor(val_in_henries * freq_in_rads, 90, false);
+        }
+
+        public phasor set_source(double Amplitude, double phase)
+        {
+            return new phasor(Amplitude, phase, false);
+        }
+
         public override string ToString()
         {
-            return String.Format("{0} /_ {1}", mRadius, mAngle);
+           return String.Format("{0} /_ {1}", Math.Round(mRadius, number_dec_places), Math.Round(mAngle, number_dec_places));
         }
 
         public phasor(double x_cord, double y_cord, bool rect)
@@ -320,6 +354,55 @@ namespace libPhasor
                 this.mX_cord = x_cord * Math.Cos(ang);
                 this.mY_cord = x_cord * Math.Sin(ang);
             }
+            this.number_dec_places = 3;
+        }
+
+        public phasor(double x_cord, double y_cord, int num_display, bool rect)
+        {
+
+            #region check for NaN and Infinity
+            if (Double.IsNaN(x_cord) || Double.IsNaN(y_cord))
+            {
+                this.mX_cord = 0;
+                this.mY_cord = 0;
+                this.mRadius = 0;
+                this.mAngle = 0;
+                this.error_num = 1;
+                this.isError = true;
+            }
+
+            if (Double.IsInfinity(x_cord) || Double.IsInfinity(y_cord))
+            {
+                this.mX_cord = 0;
+                this.mY_cord = 0;
+                this.mRadius = 0;
+                this.mAngle = 0;
+                this.error_num = 2;
+                this.isError = true;
+            }
+
+            if (isError)
+                return;
+            #endregion
+
+            if (rect) //rectangular coordinates
+            {
+                this.mX_cord = x_cord;
+                this.mY_cord = y_cord;
+
+                //radius is distance from origin to the point
+                this.mRadius = Math.Sqrt(Math.Pow(x_cord, 2) + Math.Pow(y_cord, 2));
+                this.mAngle = rad2deg(Math.Atan2(y_cord, x_cord));
+            }
+            else //treat them as r, theta
+            {
+                this.mRadius = x_cord;
+                this.mAngle = y_cord;
+                double ang = deg2rad(mAngle);
+                this.mX_cord = x_cord * Math.Cos(ang);
+                this.mY_cord = x_cord * Math.Sin(ang);
+            }
+            this.number_dec_places = num_display;
         }
 
         public phasor(phasor p)
@@ -328,7 +411,16 @@ namespace libPhasor
             this.mY_cord = p.y;
             this.mRadius = p.mag;
             this.mAngle = p.angle_deg;
+            this.number_dec_places = p.number_dec_places;
         }
-    
+
+        public phasor()
+        {
+            this.mX_cord = 0;
+            this.mY_cord = 0;
+            this.mRadius = 0;
+            this.mAngle = 0;
+            this.number_dec_places = 3;
+        }
     }
 }
