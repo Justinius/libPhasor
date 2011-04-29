@@ -283,27 +283,7 @@ namespace libPhasor
 
             return error_string;
         }
-
-        public phasor set_resistor(double resistor_val)
-        {
-            return new phasor(resistor_val, 0, false);
-        }
-
-        public phasor set_capacitor(double val_in_farads, double freq_in_rads)
-        {
-            return new phasor(1/(val_in_farads * freq_in_rads), -90, false);
-        }
-
-        public phasor set_inductor(double val_in_henries, double freq_in_rads)
-        {
-            return new phasor(val_in_henries * freq_in_rads, 90, false);
-        }
-
-        public phasor set_source(double Amplitude, double phase)
-        {
-            return new phasor(Amplitude, phase, false);
-        }
-
+        
         public override string ToString()
         {
            return String.Format("{0} /_ {1}", Math.Round(mRadius, number_dec_places), Math.Round(mAngle, number_dec_places));
