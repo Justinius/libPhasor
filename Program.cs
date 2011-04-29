@@ -31,7 +31,7 @@ namespace ConsoleApplication1
             phasor copy_phas = new phasor(my_phasor);
             Console.WriteLine(copy_phas.ToString());
 
-            phasor my_resist = new phasor().set_resistor(12);
+            phasor my_resist = set_resistor(12);
             Console.WriteLine(my_resist.ToString());
             
             //sample of use in circuit type analysis
@@ -43,11 +43,11 @@ namespace ConsoleApplication1
             Console.WriteLine();
             //Example one
             Console.WriteLine("Example 1 on http://www.calvin.edu/~svleest/circuitExamples/PhasorDomain/");
-            phasor source = new phasor().set_source(10, 0);
+            phasor source = set_source(10, 0);
             Console.WriteLine("Source Phasor: {0}", source.ToString());
-            phasor r = new phasor().set_resistor(1000); //needs to be in Ohms
+            phasor r = set_resistor(1000); //needs to be in Ohms
             Console.WriteLine("Resistor Phasor: {0}", r.ToString());
-            phasor c = new phasor().set_capacitor(1e-6, 2000); //1 microFarad and the source is 2000
+            phasor c = set_capacitor(1e-6, 2000); //1 microFarad and the source is 2000
             Console.WriteLine("Capacitor Phasor: {0}", c.ToString());
             
             phasor total_imped = r + c;
@@ -60,11 +60,11 @@ namespace ConsoleApplication1
 
             Console.WriteLine();
             Console.WriteLine("Example 4 on http://www.calvin.edu/~svleest/circuitExamples/PhasorDomain/");
-            source = new phasor().set_source(8, 45);
-            phasor r1 = new phasor().set_resistor(3000);
-            phasor r2 = new phasor().set_resistor(1000);
-            c = new phasor().set_capacitor(1e-9, 1e6);
-            phasor l = new phasor().set_inductor(2e-3, 1e6);
+            source = set_source(8, 45);
+            phasor r1 = set_resistor(3000);
+            phasor r2 = set_resistor(1000);
+            c = set_capacitor(1e-9, 1e6);
+            phasor l = set_inductor(2e-3, 1e6);
 
             Console.WriteLine("Components in circuit");
             Console.WriteLine("Source Phasor: {0}", source.ToString());
@@ -92,10 +92,10 @@ namespace ConsoleApplication1
 
             Console.WriteLine();
             Console.WriteLine("Example 8 on http://www.calvin.edu/~svleest/circuitExamples/PhasorDomain/");
-            source = new phasor().set_source(5, 0);
-            r1 = new phasor().set_resistor(5000);
-            c = new phasor().set_capacitor(70e-12, 2e6);
-            l = new phasor().set_inductor(5e-3, 2e6);
+            source = set_source(5, 0);
+            r1 = set_resistor(5000);
+            c = set_capacitor(70e-12, 2e6);
+            l = set_inductor(5e-3, 2e6);
             Console.WriteLine("Components in circuit");
             Console.WriteLine("Source Phasor: {0}", source.ToString());
             Console.WriteLine("R1 Phasor: {0}", r1.ToString());
@@ -110,6 +110,26 @@ namespace ConsoleApplication1
             
 
             Console.ReadLine();
+        }
+
+        static public phasor set_resistor(double resistor_val)
+        {
+            return new phasor(resistor_val, 0, false);
+        }
+
+        static public phasor set_capacitor(double val_in_farads, double freq_in_rads)
+        {
+            return new phasor(1 / (val_in_farads * freq_in_rads), -90, false);
+        }
+
+        static public phasor set_inductor(double val_in_henries, double freq_in_rads)
+        {
+            return new phasor(val_in_henries * freq_in_rads, 90, false);
+        }
+
+        static public phasor set_source(double Amplitude, double phase)
+        {
+            return new phasor(Amplitude, phase, false);
         }
     }
 }
