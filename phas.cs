@@ -13,6 +13,7 @@ namespace libPhasor
         private double mAngle;
         private int error_num;
         private int number_dec_places;
+        private double mult;
         public bool isError;
 
         #region utility functions
@@ -77,7 +78,7 @@ namespace libPhasor
         {
 
             #region check for NaN and Infinity
-            if (Double.IsNaN(x) || Double.IsNaN(y))
+            if (Double.IsNaN(mX_cord) || Double.IsNaN(mY_cord))
             {
                 mX_cord = 0;
                 mY_cord = 0;
@@ -87,7 +88,7 @@ namespace libPhasor
                 isError = true;
             }
 
-            if (Double.IsInfinity(x) || Double.IsInfinity(y))
+            if (Double.IsInfinity(mX_cord) || Double.IsInfinity(mY_cord))
             {
                 mX_cord = 0;
                 mY_cord = 0;
@@ -163,6 +164,8 @@ namespace libPhasor
                     number_dec_places = 10;
                 else if (number_dec_places < 0)
                     number_dec_places = 0;
+
+                mult = Math.Pow(10, number_dec_places);
             }
         }
         #endregion
@@ -262,6 +265,19 @@ namespace libPhasor
             y_out = mRadius * Math.Sin(ang);
         }
 
+        public void comp_conj()
+        {
+            this.mY_cord = -1 * this.mY_cord;
+            update_on_cord();
+        }
+
+        public void comp_conj(phasor p)
+        {
+            this.mX_cord = p.x;
+            this.mY_cord = -1*p.y;
+            update_on_cord();
+        }
+
         public string error_str()
         {
             string error_string = "No Error.";
@@ -286,7 +302,7 @@ namespace libPhasor
         
         public override string ToString()
         {
-           return String.Format("{0} /_ {1}", Math.Round(mRadius, number_dec_places), Math.Round(mAngle, number_dec_places));
+            return String.Format("{0} /_ {1}", Math.Truncate(mRadius*mult)/mult, Math.Truncate(mAngle*mult)/mult);
         }
 
         public phasor(double x_cord, double y_cord, bool rect)
@@ -301,6 +317,8 @@ namespace libPhasor
                 this.mAngle = 0;
                 this.error_num = 1;
                 this.isError = true;
+                this.number_dec_places = 3;
+                this.mult = 1000.0;
             }
 
             if (Double.IsInfinity(x_cord) || Double.IsInfinity(y_cord))
@@ -311,6 +329,8 @@ namespace libPhasor
                 this.mAngle = 0;
                 this.error_num = 2;
                 this.isError = true;
+                this.number_dec_places = 3;
+                this.mult = 1000.0;
             }
 
             if (isError)
@@ -335,6 +355,7 @@ namespace libPhasor
                 this.mY_cord = x_cord * Math.Sin(ang);
             }
             this.number_dec_places = 3;
+            this.mult = Math.Pow(10, this.number_dec_places);
         }
 
         public phasor(double x_cord, double y_cord, int num_display, bool rect)
@@ -349,6 +370,8 @@ namespace libPhasor
                 this.mAngle = 0;
                 this.error_num = 1;
                 this.isError = true;
+                this.number_dec_places = 3;
+                this.mult = 1000.0;
             }
 
             if (Double.IsInfinity(x_cord) || Double.IsInfinity(y_cord))
@@ -359,6 +382,8 @@ namespace libPhasor
                 this.mAngle = 0;
                 this.error_num = 2;
                 this.isError = true;
+                this.number_dec_places = 3;
+                this.mult = 1000.0;
             }
 
             if (isError)
@@ -383,6 +408,7 @@ namespace libPhasor
                 this.mY_cord = x_cord * Math.Sin(ang);
             }
             this.number_dec_places = num_display;
+            this.mult = Math.Pow(10, this.number_dec_places);
         }
 
         public phasor(phasor p)
@@ -391,7 +417,8 @@ namespace libPhasor
             this.mY_cord = p.y;
             this.mRadius = p.mag;
             this.mAngle = p.angle_deg;
-            this.number_dec_places = p.number_dec_places;
+            this.number_dec_places = p.num_places;
+            this.mult = Math.Pow(10, this.number_dec_places);
         }
 
         public phasor()
@@ -401,6 +428,7 @@ namespace libPhasor
             this.mRadius = 0;
             this.mAngle = 0;
             this.number_dec_places = 3;
+            this.mult = Math.Pow(10, this.number_dec_places);
         }
     }
 }
