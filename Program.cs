@@ -131,5 +131,16 @@ namespace ConsoleApplication1
         {
             return new phasor(Amplitude, phase, false);
         }
+        
+        static public phasor add_series(phasor pOne, phasor pTwo)
+        {
+            return pOne + pTwo;
+        }
+        
+        static public phasor add_parallel(phasor pOne, phasor pTwo)
+        {
+            phasor denom = 1/pOne + 1/pTwo;
+            return 1/denom;
+        }
     }
 }
